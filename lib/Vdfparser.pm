@@ -62,9 +62,9 @@ sub vdf_decode
 		if (defined $switch_trigger{$char}) {
        			 $switch_trigger{$char}->();
     		}
-		if($reading == 1){
-                        $string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN);
-                }
+
+                $string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN && $char ne CURLY_BRACE_START && $char ne CURLY_BRACE_END);
+
 		if($char eq '\\') {
 			$read = read RFILE, $char, 1;
 		} 
@@ -80,9 +80,6 @@ sub case_quote
 {
 	$quote_counter++;
 	$quote_counter = 1 if($quote_counter == 5);
-	if($reading == 1)
-	{
-		$reading = 0;
 		if($quote_counter == 2) {
 			$key = $string;	
 		#	print "STRING: $string\n";
@@ -95,11 +92,6 @@ sub case_quote
 			}
 			$string = "";
 		}
-	} 
-	else 
-	{
-		$reading = 1;
-	}	
 }
 sub case_brace_start
 {
