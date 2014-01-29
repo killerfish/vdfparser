@@ -52,8 +52,7 @@ sub vdf_decode
 	binmode RFILE;
 	my ($read, $char);
 	while ($read = read RFILE, $char, 1) {
-		#print $char;
-		$string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN);
+	#	print $char;
 		if(length($key) > 0 && length($value) > 0) {
         		$ptr->{$key} = $value;
                 	($key, $value) = ("")x2;
@@ -63,10 +62,9 @@ sub vdf_decode
 		if (defined $switch_trigger{$char}) {
        			 $switch_trigger{$char}->();
     		}
-		else
-		{
-			$reading = 1;
-		}
+		if($reading == 1){
+                        $string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN);
+                }
 		if($char eq '\\') {
 			$read = read RFILE, $char, 1;
 		} 
@@ -82,23 +80,31 @@ sub case_quote
 {
 	$quote_counter++;
 	$quote_counter = 1 if($quote_counter == 5);
-	if($quote_counter == 2) {
-		$key = $string;	
-		#print $string."\n";
-		$string = "";
-		
-	} elsif($quote_counter == 4) {
-		$value = $string;
-		if(!(length($value)>0))
-		{
-			$value = "NA";
+	if($reading == 1)
+	{
+		$reading = 0;
+		if($quote_counter == 2) {
+			$key = $string;	
+		#	print "STRING: $string\n";
+			$string = "";
+		} elsif($quote_counter == 4) {
+			$value = $string;
+			if(!(length($value)>0))
+			{
+				$value = "NA";
+			}
+			$string = "";
 		}
-		$string = "";
+	} 
+	else 
+	{
+		$reading = 1;
 	}	
 }
 sub case_brace_start
 {
 	die "Not properly formed key-value structure" if(!(length($key)>0));
+	#print "KEY: $key\n";
 	$ptr->{$key} = {};
 	$ptr = $ptr->{$key};
         if($path eq "") {
@@ -113,10 +119,8 @@ sub case_brace_start
 sub case_brace_end
 {
 	$ptr = \%result;
-	print "its prints ";
-	@fullpath = split('\.', $path);
-	print "YATTAH";
-	print @fullpath."YAY";
+	@fullpath = split('.', $path);
+	print @fullpath;
 	$newpath = "";
 	if(scalar(@fullpath) > 0) {
 		for(my $i=0;(scalar(@fullpath)-1);$i++) {
@@ -129,7 +133,6 @@ sub case_brace_end
 		}
 
 	}
-	print $path."-----".$newpath."\n";
 
 	$path = $newpath;
 }
