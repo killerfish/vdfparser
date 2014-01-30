@@ -4,7 +4,8 @@ use strict;
 use warnings;
 use Carp;
 use Exporter;
-
+use Data::Dumper;
+$|= 1;
 our $VERSION     = 1.00;
 our $ABSTRACT    = "Module for Diffbot Article api";
 our @ISA = qw(Exporter);
@@ -52,7 +53,6 @@ sub vdf_decode
 	binmode RFILE;
 	my ($read, $char);
 	while ($read = read RFILE, $char, 1) {
-	#	print $char;
 		if(length($key) > 0 && length($value) > 0) {
         		$ptr->{$key} = $value;
                 	($key, $value) = ("")x2;
@@ -64,7 +64,6 @@ sub vdf_decode
     		}
 
                 $string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN && $char ne CURLY_BRACE_START && $char ne CURLY_BRACE_END);
-
 		if($char eq '\\') {
 			$read = read RFILE, $char, 1;
 		} 
@@ -75,7 +74,7 @@ return %result;
 sub vdf_encode
 {}
 
-#-----------------------------------------------------------------SWITCH CASES----------------------------------------------------------#
+#-----------------------------------------------------------------SWITCH CASES----------------------------------------#
 sub case_quote
 {
 	$quote_counter++;
@@ -96,13 +95,12 @@ sub case_quote
 sub case_brace_start
 {
 	die "Not properly formed key-value structure" if(!(length($key)>0));
-	#print "KEY: $key\n";
 	$ptr->{$key} = {};
 	$ptr = $ptr->{$key};
         if($path eq "") {
         	$path = $key;
         } else {
-                $path .= '.'.$key;
+                $path .= ','.$key;
 	}
 	($string, $key, $value) = ("")x3;
 	$quote_counter = 0;
@@ -111,27 +109,24 @@ sub case_brace_start
 sub case_brace_end
 {
 	$ptr = \%result;
-	@fullpath = split('.', $path);
-	print @fullpath;
+	@fullpath = split(',', $path);
 	$newpath = "";
 	if(scalar(@fullpath) > 0) {
-		for(my $i=0;(scalar(@fullpath)-1);$i++) {
+		for(my $i=0;$i<(scalar(@fullpath)-1);$i++) {
 			if($newpath eq "") {
 				$newpath .= $fullpath[$i];
+				$ptr = $ptr->{$fullpath[$i]};
 			} else {
-				$newpath .= '.'.$fullpath[$i];
-				$ptr = $ptr->{$fullpath[$i]};	
+				$newpath .= ','.$fullpath[$i];
+				$ptr = $ptr->{$fullpath[$i]};
 			}
 		}
 
 	}
-
-	$path = $newpath;
+	$path = $newpath;	
 }
 
-
 1;
-
 
 __END__
 
@@ -145,13 +140,13 @@ Version 1.00
 
 =head1 SYNOPSIS
 
-This module provides an encoder/decoder for Valve Data Format <> Perl Data Structure (hash of hashes).
+This module provides an encoder/decoder for Valve Data Format <> Perl Data Structure.
 
 =head1 METHODS
 	
 	use Vdfparser qw(vdf_encode vdf_decode);
-	my $vdf = vdf_encode(%)
-	my %hash_output = vdf_decode($file)
+	my $vdf = vdf_encode(%your_hash_input);              #-------------Yet to be implemented-------#
+	my %hash_output = vdf_decode($your_file_input);
 
 =head1 AUTHOR
 
@@ -159,7 +154,7 @@ Usman Raza, B<C<usman.r123 at gmail.com>>
 
 =head1 SUPPORT
 
-You can find documentation for this module with the perldoc command.
+You can find documentation for this module with the perldoc command. Also check the example provided.
 
     perldoc Vdfparser
 
