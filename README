@@ -1,6 +1,6 @@
 Vdfparser
 
-This module converts valve data format to perl data structure and vice versa.
+This module converts valve data format (vdf) to perl data structure and vice versa.
 
 METHODS
 	use Vdfparser qw(encode decode);
