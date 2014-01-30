@@ -1,8 +1,9 @@
 Vdfparser
 
-This module converts valve data format to perl data structure and vice cersa.
+This module converts valve data format to perl data structure and vice versa.
 
-	use Vdfparser qw(encode decode)
+METHODS
+	use Vdfparser qw(encode decode);
         
         my %hash = decode($filepath);
 	my $vdfdata = encode(%hash); #encode is yet to be implemented.
@@ -24,7 +25,7 @@ perldoc command or try the man command also
 
 LICENSE AND COPYRIGHT
 
-Copyright 2014 Usman Raza.
+Copyright 2014 Usman Raza. <usmandotr123 at gmaildotcom>
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
