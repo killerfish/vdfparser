@@ -10,7 +10,6 @@ use Vdfparser qw(:decode);
 $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Sortkeys = sub { [sort {$b cmp $a} keys %{$_[0]}] };
 
-
-my %hash = vdf_decode("./samplevdf");
+my %hash = vdf_decode((data => "", file => "./samplevdf"));
 print Dumper \%hash;
 
