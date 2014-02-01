@@ -178,7 +178,9 @@ This module provides an encoder/decoder for Valve Data Format <> Perl Data Struc
 	
 	use Vdfparser qw(vdf_encode vdf_decode);
 	my $vdf = vdf_encode(%your_hash_input);              #-------------Yet to be implemented-------#
-	my %hash_output = vdf_decode($your_file_input);
+
+	my %input = (data => $data, [file => $pathtovdffile]);        Pass vdf data or filepath to vdf file
+	my %hash_output = vdf_decode(%input);
 
 =head1 AUTHOR
 

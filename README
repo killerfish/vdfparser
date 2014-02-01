@@ -5,8 +5,10 @@ This module converts valve data format (vdf) to perl data structure and vice ver
 METHODS
 	use Vdfparser qw(encode decode);
         
-        my %hash = decode($filepath);
 	my $vdfdata = encode(%hash); #encode is yet to be implemented.
+	
+	my %input = (data => $data, [file => $pathtovdffile]);        Pass vdf data or filepath to vdf file
+        my %hash_output = vdf_decode(%input);
 
 INSTALLATION
 
