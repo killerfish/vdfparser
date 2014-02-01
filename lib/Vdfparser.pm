@@ -48,25 +48,58 @@ $ptr = \%result;
 
 sub vdf_decode
 {
-	my $vdfdata = shift;
-	open (RFILE,"<",$vdfdata) || die "failed to open file\n";
-	binmode RFILE;
-	my ($read, $char);
-	while ($read = read RFILE, $char, 1) {
-		if(length($key) > 0 && length($value) > 0) {
-        		$ptr->{$key} = $value;
-                	($key, $value) = ("")x2;
-                	$quote_counter = 0;
-        	}
+	my %args = @_;
+	my ($vdfdata, $switch);
+	$vdfdata = $args{file} and $switch = 2 if (defined $args{file} && (length $args{file} > 0));
+	$vdfdata = $args{data} and $switch = 1 if (defined $args{data} && (length $args{data} > 0));
+ 	if((defined $args{data}) && (defined $args{file}))
+	{
+	 	croak "Error! Please pass value data or filename to parse!" if (!(length $args{data} > 0) && !(length $args{file} > 0));
+	}
+	if($switch == 2) {
+		open (RFILE,"<",$vdfdata) || croak "failed to open file\n";
+		binmode RFILE;
+		my ($read, $char);
+		while ($read = read RFILE, $char, 1) {
+			if(length($key) > 0 && length($value) > 0) {
+        			$ptr->{$key} = $value;
+                		($key, $value) = ("")x2;
+                		$quote_counter = 0;
+        		}
 		
-		if (defined $switch_trigger{$char}) {
-       			 $switch_trigger{$char}->();
-    		}
+			if (defined $switch_trigger{$char}) {
+       				 $switch_trigger{$char}->();
+    			}
 
-                $string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN && $char ne CURLY_BRACE_START && $char ne CURLY_BRACE_END);
-		if($char eq '\\') {
-			$read = read RFILE, $char, 1;
-		} 
+                	$string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN && $char ne CURLY_BRACE_START && $char ne CURLY_BRACE_END);
+			if($char eq '\\') {
+				$read = read RFILE, $char, 1;
+			} 
+		}
+	}
+	if($switch == 1)
+	{
+		my @chars = split(//, $vdfdata);
+		my $skip = 0;
+		foreach my $char (@chars) {
+
+			next and $skip = 0 if($skip == 1);			
+
+			if(length($key) > 0 && length($value) > 0) {
+                                $ptr->{$key} = $value;
+                                ($key, $value) = ("")x2;
+                                $quote_counter = 0;
+                        }
+
+                        if (defined $switch_trigger{$char}) {
+                                 $switch_trigger{$char}->();
+                        }
+
+                        $string .= $char if($char ne QUOTE && $char ne NEW_LINE && $char ne TAB && $char ne CARRIAGE_RETURN && $char ne CURLY_BRACE_START && $char ne CURLY_BRACE_END);
+                        if($char eq '\\') {
+				$skip = 1;
+                        }
+ 		}
 	}
 return %result;
 		
@@ -81,7 +114,6 @@ sub case_quote
 	$quote_counter = 1 if($quote_counter == 5);
 		if($quote_counter == 2) {
 			$key = $string;	
-		#	print "STRING: $string\n";
 			$string = "";
 		} elsif($quote_counter == 4) {
 			$value = $string;
@@ -94,7 +126,7 @@ sub case_quote
 }
 sub case_brace_start
 {
-	die "Not properly formed key-value structure" if(!(length($key)>0));
+	croak "Not properly formed key-value structure" if(!(length($key)>0));
 	$ptr->{$key} = {};
 	$ptr = $ptr->{$key};
         if($path eq "") {
