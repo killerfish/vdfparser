@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Exporter;
-use Data::Dumper;
+
 our $VERSION     = 1.00;
 our $ABSTRACT    = "Module for parsing VDF to perl data structures and vice versa.";
 our @ISA = qw(Exporter);
@@ -54,7 +54,7 @@ sub vdf_decode
 	$vdfdata = $args{data} and $switch = 1 if (defined $args{data} && (length $args{data} > 0));
  	if((defined $args{data}) && (defined $args{file}))
 	{
-	 	croak "Error! Please pass data or filename to parse!" if (!(length $args{data} > 0) && !(length $args{file} > 0));
+	 	croak "Error! Please pass data or filename to parse!\n" if (!(length $args{data} > 0) && !(length $args{file} > 0));
 	}
 	if($switch == 2) {
 		open (RFILE,"<",$vdfdata) || croak "failed to open file\n";
@@ -128,7 +128,7 @@ sub case_quote
 }
 sub case_brace_start
 {
-	croak "Not properly formed key-value structure" if(!(length($key)>0));
+	croak "Not a valid Valve data format, check key-values\n" if(!(length($key)>0));
 	$myptr->{$key} = {};
 	$myptr = $myptr->{$key};
         if($path eq "") {
