@@ -6,7 +6,7 @@ use Carp;
 use Exporter;
 use Data::Dumper;
 our $VERSION     = 1.00;
-our $ABSTRACT    = "Module for Diffbot Article api";
+our $ABSTRACT    = "Module for parsing VDF to perl data structures and vice versa.";
 our @ISA = qw(Exporter);
 our %EXPORT_TAGS = (
           'encode' => [ qw(
