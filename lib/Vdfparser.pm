@@ -5,7 +5,6 @@ use warnings;
 use Carp;
 use Exporter;
 use Data::Dumper;
-$|= 1;
 our $VERSION     = 1.00;
 our $ABSTRACT    = "Module for Diffbot Article api";
 our @ISA = qw(Exporter);
@@ -40,12 +39,13 @@ our %switch_trigger = (
 );
 
 my $quote_counter = 0;
-my $reading = 0;
 my ($string, $path, $newpath, $key, $value) = ("")x5;
-my (%result, $ptr, @fullpath);
+my (%result, $myptr, @fullpath);
 %result = ();
-$ptr = \%result;
+$myptr = \%result;
 
+
+#------------------------------------------------------------Decode function---------------------------------------------#
 sub vdf_decode
 {
 	my %args = @_;
@@ -54,7 +54,7 @@ sub vdf_decode
 	$vdfdata = $args{data} and $switch = 1 if (defined $args{data} && (length $args{data} > 0));
  	if((defined $args{data}) && (defined $args{file}))
 	{
-	 	croak "Error! Please pass value data or filename to parse!" if (!(length $args{data} > 0) && !(length $args{file} > 0));
+	 	croak "Error! Please pass data or filename to parse!" if (!(length $args{data} > 0) && !(length $args{file} > 0));
 	}
 	if($switch == 2) {
 		open (RFILE,"<",$vdfdata) || croak "failed to open file\n";
@@ -62,7 +62,7 @@ sub vdf_decode
 		my ($read, $char);
 		while ($read = read RFILE, $char, 1) {
 			if(length($key) > 0 && length($value) > 0) {
-        			$ptr->{$key} = $value;
+        			$myptr->{$key} = $value;
                 		($key, $value) = ("")x2;
                 		$quote_counter = 0;
         		}
@@ -86,7 +86,7 @@ sub vdf_decode
 			next and $skip = 0 if($skip == 1);			
 
 			if(length($key) > 0 && length($value) > 0) {
-                                $ptr->{$key} = $value;
+                                $myptr->{$key} = $value;
                                 ($key, $value) = ("")x2;
                                 $quote_counter = 0;
                         }
@@ -104,6 +104,8 @@ sub vdf_decode
 return %result;
 		
 }
+
+#-------------------------Encode function To-do-------------------------
 sub vdf_encode
 {}
 
@@ -127,8 +129,8 @@ sub case_quote
 sub case_brace_start
 {
 	croak "Not properly formed key-value structure" if(!(length($key)>0));
-	$ptr->{$key} = {};
-	$ptr = $ptr->{$key};
+	$myptr->{$key} = {};
+	$myptr = $myptr->{$key};
         if($path eq "") {
         	$path = $key;
         } else {
@@ -140,17 +142,17 @@ sub case_brace_start
 }
 sub case_brace_end
 {
-	$ptr = \%result;
+	$myptr = \%result;
 	@fullpath = split(',', $path);
 	$newpath = "";
 	if(scalar(@fullpath) > 0) {
 		for(my $i=0;$i<(scalar(@fullpath)-1);$i++) {
 			if($newpath eq "") {
 				$newpath .= $fullpath[$i];
-				$ptr = $ptr->{$fullpath[$i]};
+				$myptr = $myptr->{$fullpath[$i]};
 			} else {
 				$newpath .= ','.$fullpath[$i];
-				$ptr = $ptr->{$fullpath[$i]};
+				$myptr = $myptr->{$fullpath[$i]};
 			}
 		}
 
